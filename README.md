@@ -20,6 +20,18 @@ python app.py
 ```
 Then open http://127.0.0.1:5000
 
+## Docker
+```bash
+docker compose up --build -d   # app at http://127.0.0.1:5000, data in exptracker-data volume
+docker compose down
+```
+Or with plain docker:
+```bash
+docker build -t exptracker .
+docker run -d -p 5000:5000 -e EXPENSE_DB=/data/expenses.db -v exptracker-data:/data exptracker
+```
+Set `EXPENSE_DB` to choose where SQLite stores data (defaults to `expenses.db` next to `app.py`).
+
 ## Project structure
 ```
 app.py               # Flask app + SQLite logic

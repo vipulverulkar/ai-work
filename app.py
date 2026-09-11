@@ -6,7 +6,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash, g
 app = Flask(__name__)
 app.secret_key = "exptracker-secret-change-me"
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "expenses.db")
+DB_PATH = os.environ.get(
+    "EXPENSE_DB",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "expenses.db"),
+)
 
 DEFAULT_CATEGORIES = [
     ("Salary", "income"),
@@ -444,6 +447,10 @@ def reports():
                            cat_rows=cat_rows, period_label=month_str)
 
 
+# Ensure tables exist on import too (needed when served by gunicorn,
+# where the __main__ block below never runs). init_db is idempotent.
+init_db()
+
+
 if __name__ == "__main__":
-    init_db()
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0", port=5000)

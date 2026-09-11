@@ -23,10 +23,11 @@ Then open http://127.0.0.1:5000
 ## Project structure
 ```
 app.py               # Flask app + SQLite logic
-templates/           # base, index (dashboard), edit, categories, reports
+expenses.sql         # database schema + default categories (same as app init_db)
+templates/           # base, index (dashboard), transactions, edit, categories, reports
 static/style.css
 requirements.txt
-expenses.db          # auto-created on first run
+expenses.db          # auto-created on first run (git-ignored)
 ```
 
 ## Database schema

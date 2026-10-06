@@ -15,7 +15,7 @@ No API keys needed (Open-Meteo + DuckDuckGo).
 ## Setup
 
 ```bash
-cd /home/vipul/Documents/Code/mcp_langchain
+cd /path/to/mcp_langchain
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .        # or: pip install mcp langchain langchain-core langchain-community langchain-mcp-adapters langgraph httpx ddgs python-dotenv
@@ -48,8 +48,8 @@ python client.py Tokyo --tool search_web --query "Tokyo typhoon alert"
 {
   "mcpServers": {
     "weather-search": {
-      "command": "/home/vipul/Documents/Code/mcp_langchain/.venv/bin/python",
-      "args": ["/home/vipul/Documents/Code/mcp_langchain/server.py"]
+      "command": "/path/to/mcp_langchain/.venv/bin/python",
+      "args": ["/path/to/mcp_langchain/server.py"]
     }
   }
 }

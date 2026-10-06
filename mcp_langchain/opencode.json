@@ -4,8 +4,8 @@
     "weather-search": {
       "type": "local",
       "command": [
-        "/home/vipul/Documents/Code/mcp_langchain/.venv/bin/python",
-        "/home/vipul/Documents/Code/mcp_langchain/server.py"
+        "python",
+        "server.py"
       ],
       "enabled": true
     }

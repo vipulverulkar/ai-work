@@ -1,0 +1,8 @@
+Meeting Notes - Q3 Planning
+==========================
+Date: 2026-09-15
+Attendees: Alice, Bob, Charlie
+
+- Discussed roadmap for the file explorer project.
+- Action item: add CSV and text search support.
+- Next meeting: Monday 10am.

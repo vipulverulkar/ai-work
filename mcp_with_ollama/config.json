@@ -1,0 +1,9 @@
+{
+  "model": "llama3.1:8b",
+  "host": "http://localhost:11434",
+  "temperature": 0.1,
+  "max_iters": 6,
+  "verbose": false,
+  "directory": ".",
+  "allowed_root": null
+}

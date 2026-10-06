@@ -1,0 +1,20 @@
+[project]
+name = "mcp-ollama-file-lister"
+version = "1.0.0"
+description = "MCP file-explorer server + Ollama agent client"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.8.0,<2",
+    "ollama>=0.4.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

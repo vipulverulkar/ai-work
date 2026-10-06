@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>File Explorer — MCP + Ollama</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+  header { display: flex; justify-content: space-between; align-items: baseline; }
+  .badge { font-size: 0.85rem; color: #555; }
+  section { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  h2 { margin-top: 0; font-size: 1.1rem; }
+  .row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  input, select, textarea, button { font-size: 0.95rem; padding: 0.4rem 0.6rem; }
+  input[type="text"], textarea { flex: 1; min-width: 200px; }
+  button { cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.9rem; }
+  th, td { text-align: left; border-bottom: 1px solid #eee; padding: 0.35rem 0.4rem; }
+  th { color: #555; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  code { background: #f4f4f4; padding: 0 0.25rem; border-radius: 3px; }
+  .error { color: #b00020; }
+  .muted { color: #666; font-size: 0.85rem; }
+  #answer { white-space: pre-wrap; margin-top: 0.75rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>File Explorer</h1>
+  <span class="badge">model: <code>{{ model }}</code></span>
+</header>
+
+<section>
+  <h2>Browse directory</h2>
+  <div class="row">
+    <input id="dir" type="text" value="{{ default_dir }}" placeholder="Directory (default: current folder)">
+    <input id="pattern" type="text" value="*" placeholder="Pattern, e.g. *.csv" size="12">
+    <select id="sort_by">
+      <option value="modified" selected>newest first</option>
+      <option value="size">biggest first</option>
+      <option value="name">name A–Z</option>
+    </select>
+    <select id="order">
+      <option value="desc" selected>desc</option>
+      <option value="asc">asc</option>
+    </select>
+    <button onclick="browse()">Browse</button>
+  </div>
+  <div id="files"></div>
+</section>
+
+<section>
+  <h2>Search files by name</h2>
+  <div class="row">
+    <input id="query" type="text" placeholder="e.g. users">
+    <label class="muted"><input id="recursive" type="checkbox" checked> recursive</label>
+    <button onclick="search()">Search</button>
+  </div>
+  <div id="hits"></div>
+</section>
+
+<section>
+  <h2>Ask about your files</h2>
+  <div class="row">
+    <textarea id="prompt" rows="2" placeholder="e.g. show files biggest first with size and date"></textarea>
+    <button onclick="ask()">Ask</button>
+  </div>
+  <div id="answer" class="muted">The assistant calls the same list/search tools, then summarises.</div>
+</section>
+
+<script>
+const dir = () => document.getElementById('dir').value.trim() || '.';
+
+function table(rows) {
+  if (!rows.length) return '<p class="muted">No files found.</p>';
+  let h = '<table><tr><th>Name</th><th>Type</th><th style="text-align:right">Size</th><th>Modified</th><th>Permissions</th></tr>';
+  for (const e of rows) {
+    h += `<tr><td><code>${e.name}</code></td><td>${e.type}</td>`
+       + `<td class="num">${e.size_human || '—'}</td><td>${(e.modified || '').slice(0, 19).replace('T', ' ')}</td>`
+       + `<td><code>${e.permissions || ''}</code></td></tr>`;
+  }
+  return h + '</table>';
+}
+
+async function browse() {
+  const q = new URLSearchParams({ directory: dir(), pattern: document.getElementById('pattern').value || '*',
+    sort_by: document.getElementById('sort_by').value, order: document.getElementById('order').value });
+  const r = await fetch('/api/files?' + q);
+  const d = await r.json();
+  document.getElementById('files').innerHTML = d.error
+    ? `<p class="error">${d.error}</p>` : `<p class="muted">${d.total} entries in ${d.directory}</p>` + table(d.entries);
+}
+
+async function search() {
+  const q = new URLSearchParams({ query: document.getElementById('query').value, directory: dir(),
+    recursive: document.getElementById('recursive').checked });
+  if (!q.get('query').trim()) return;
+  const r = await fetch('/api/search?' + q);
+  const d = await r.json();
+  document.getElementById('hits').innerHTML = d.error
+    ? `<p class="error">${d.error}</p>` : `<p class="muted">${d.total} hits for "${d.query}"</p>` + table(d.hits);
+}
+
+async function ask() {
+  const prompt = document.getElementById('prompt').value.trim();
+  if (!prompt) return;
+  const box = document.getElementById('answer');
+  box.textContent = 'Thinking… (calling file tools)';
+  const r = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ prompt, directory: dir() }) });
+  const d = await r.json();
+  box.textContent = d.error ? 'Error: ' + d.error
+    : d.answer + (d.tool_calls?.length ? '\n\n[tools: ' + d.tool_calls.map(t => t.tool).join(', ') + ']' : '');
+}
+
+browse();
+</script>
+</body>
+</html>

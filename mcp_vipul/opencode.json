@@ -1,0 +1,1 @@
+{"$schema": "https://opencode.ai/config.json", "mcp": {"postgres-local": {"command": ["/home/vipul/Documents/Code/mcp_vipul/.venv/bin/python", "/home/vipul/Documents/Code/mcp_vipul/postgres_mcp_server.py"], "enabled": true, "type": "local"}}}
